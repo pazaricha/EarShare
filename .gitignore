@@ -3,3 +3,6 @@ build/
 art/*/
 art/*.txt
 art/gen.log
+marketing/video/frames/
+marketing/video/filter.txt
+marketing/*/v*.png.job.json
