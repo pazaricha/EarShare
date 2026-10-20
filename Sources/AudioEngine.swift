@@ -12,7 +12,7 @@ struct OutputDevice: Identifiable, Hashable {
 enum AudioEngineError: Error { case coreAudio(String, OSStatus), needAtLeastTwo }
 
 final class AudioEngine {
-    static let aggregateUID = "com.paz.dualaudio.aggregate"
+    static let aggregateUID = "com.paz.earshare.aggregate"
     private var aggregateID: AudioDeviceID?
     private var savedDefault: AudioDeviceID?
     private var listener: AudioObjectPropertyListenerBlock?
@@ -124,7 +124,7 @@ final class AudioEngine {
             [kAudioSubDeviceUIDKey: uid, kAudioSubDeviceDriftCompensationKey: i == 0 ? 0 : 1]
         }
         let desc: [String: Any] = [
-            kAudioAggregateDeviceNameKey: "DualAudio",
+            kAudioAggregateDeviceNameKey: "EarShare",
             kAudioAggregateDeviceUIDKey: Self.aggregateUID,
             kAudioAggregateDeviceIsPrivateKey: 0, // private aggregates can never be the system default output
             kAudioAggregateDeviceIsStackedKey: 1,

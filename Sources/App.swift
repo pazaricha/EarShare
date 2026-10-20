@@ -67,12 +67,20 @@ final class Model: ObservableObject {
 }
 
 @main
-struct DualAudioApp: App {
+struct EarShareApp: App {
+    // template image so macOS tints it for light/dark menu bars; SF Symbol fallback when run outside the bundle
+    static let menuBarIcon: NSImage = {
+        let img = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "headphones", accessibilityDescription: "EarShare")!
+        img.isTemplate = true
+        return img
+    }()
     @StateObject private var model = Model()
 
     var body: some Scene {
-        MenuBarExtra("DualAudio", systemImage: "headphones") {
+        MenuBarExtra {
             ContentView().environmentObject(model)
+        } label: {
+            Image(nsImage: Self.menuBarIcon).accessibilityLabel("EarShare")
         }
         .menuBarExtraStyle(.window)
     }

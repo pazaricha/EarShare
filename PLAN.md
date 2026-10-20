@@ -1,4 +1,4 @@
-# DualAudio — plan
+# EarShare — plan
 
 Menu-bar macOS app (macOS 14+, Swift, SwiftUI `MenuBarExtra`, no Xcode — built with `swiftc` from Command Line Tools).
 

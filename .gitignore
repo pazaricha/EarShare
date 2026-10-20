@@ -1,2 +1,5 @@
 build/
 .DS_Store
+art/*/
+art/*.txt
+art/gen.log
