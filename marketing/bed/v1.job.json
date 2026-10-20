@@ -1,0 +1,28 @@
+{
+ "ok": true,
+ "out": "/Users/paz/Documents/EarShare/marketing/bed/v1.png",
+ "model": null,
+ "effort": "low",
+ "appended_to_prompt": null,
+ "t_first_event": 0.2,
+ "t_image": 52.5,
+ "t_exit": 52.5,
+ "tool_calls": [],
+ "codex_messages": [],
+ "events": "/Users/paz/Documents/EarShare/marketing/bed/v1.events.jsonl",
+ "thread": "01a15b01-4094-74b3-9a9a-cbb358d9f0db",
+ "checks": {
+  "image_calls": 1,
+  "prompt_verbatim": true,
+  "refs_passed": true,
+  "transparent_flag": null,
+  "ok": true
+ },
+ "exit_code": 0,
+ "prompt": "Wide 1.91:1 landscape marketing illustration, warm cozy Pixar-like 3D style, matching the reference image's characters and lighting.\nComposition: a cutaway \"dollhouse\" cross-section of a family home at night, three rooms side by side seen from the front.\nCenter room (largest): the parents' bedroom. The same bearded dad and adult mom from the reference sit up in bed under a fluffy duvet, each wearing one pair of white wireless earbuds, a laptop on a tray on their laps glowing blue, a red-and-white striped popcorn bucket between them, both smiling and quietly laughing. Thin glowing sound waves flow from the laptop to each parent's earbuds only.\nLeft room: a young girl asleep in her bed with a star night-light and a teddy bear. Right room: a young boy asleep in his bed with a small moon lamp and toy rocket. Both kids peacefully sleeping, doors closed, tiny \"z z z\" above them.\nNight sky with a crescent moon and stars above the house roof. Deep navy and indigo tones with warm golden lamp and popcorn highlights.\nTop-left in clean bold rounded white sans-serif text exactly: \"EarShare\" and below it smaller: \"Movie night in bed. Kids stay asleep.\" No other text.",
+ "refs": [
+  "/Users/paz/Documents/EarShare/art/hero.png"
+ ],
+ "transparent": false,
+ "parent": null
+}

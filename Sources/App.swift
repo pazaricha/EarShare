@@ -8,13 +8,18 @@ final class Model: ObservableObject {
     @Published var devices: [OutputDevice] = []
     @Published var selected: Set<String> = Set(UserDefaults.standard.stringArray(forKey: Model.key) ?? [])
     @Published var volumes: [AudioDeviceID: Float] = [:]
+    @Published var volumeSettable: Set<AudioDeviceID> = []
     @Published var paired: [PairedAudioDevice] = []
     @Published var connecting: Set<String> = []
     @Published var running = false
     @Published var playingCount = 0
     @Published var error: String?
 
-    init() {
+    /// live: false skips CoreAudio/Bluetooth so snapshot tooling can fill in demo state
+    let live: Bool
+    init(live: Bool = true) {
+        self.live = live
+        guard live else { return }
         engine.onDevicesChanged { [weak self] in Task { @MainActor in self?.refresh() } }
         NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.engine.stopMultiOutput() }
@@ -23,8 +28,10 @@ final class Model: ObservableObject {
     }
 
     func refresh() {
+        guard live else { return }
         devices = engine.outputDevices()
         volumes = Dictionary(uniqueKeysWithValues: devices.compactMap { d in engine.volume(of: d.id).map { (d.id, $0) } })
+        volumeSettable = Set(devices.map(\.id).filter { engine.canSetVolume(of: $0) })
         paired = Bluetooth.pairedAudioDevices().filter { !$0.isConnected }
         running = engine.isRunning
     }
@@ -47,7 +54,11 @@ final class Model: ObservableObject {
             try engine.startMultiOutput(uids: uids)
             playingCount = uids.count
             error = nil
-        } catch { self.error = "\(error)" }
+        } catch AudioEngineError.needAtLeastTwo {
+            self.error = "Tick at least two outputs."
+        } catch {
+            self.error = "macOS refused to combine these outputs. Try reconnecting them. (\(error))"
+        }
         running = engine.isRunning
     }
 
@@ -90,42 +101,16 @@ struct ContentView: View {
     @EnvironmentObject var model: Model
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Outputs").font(.headline)
-            ForEach(model.devices) { d in
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack {
-                        Toggle(isOn: Binding(get: { model.selected.contains(d.uid) }, set: { model.toggle(d.uid, $0) })) {
-                            Text(d.name).lineLimit(1)
-                        }
-                        if d.isBluetooth {
-                            Text("BT").font(.caption2).padding(.horizontal, 4)
-                                .background(Color.blue.opacity(0.2), in: Capsule())
-                        }
-                    }
-                    Slider(value: Binding(get: { Double(model.volumes[d.id] ?? 0) },
-                                          set: { model.setVolume(Float($0), d) }), in: 0...1)
-                        .disabled(!model.engine.canSetVolume(of: d.id))
+        VStack(alignment: .leading, spacing: 12) {
+            if !model.running {
+                step(1, "Connect headphones")
+                if model.paired.isEmpty {
+                    Label("All your paired headphones are connected.", systemImage: "checkmark.circle.fill")
+                        .font(.callout).foregroundStyle(.secondary)
                 }
-            }
-
-            if model.running {
-                HStack {
-                    Text("▶︎ Playing on \(model.playingCount) devices")
-                    Spacer()
-                    Button("Stop") { model.stop() }
-                }
-            } else {
-                Button("Play on selected (\(model.selectedUIDs.count))") { model.start() }
-                    .disabled(model.selectedUIDs.count < 2)
-            }
-            if let e = model.error { Text(e).foregroundColor(.red).font(.caption) }
-
-            if !model.paired.isEmpty {
-                Divider()
-                Text("Paired Bluetooth (not connected)").font(.headline)
                 ForEach(model.paired) { p in
                     HStack {
+                        Image(systemName: "headphones").foregroundStyle(.secondary)
                         Text(p.name).lineLimit(1)
                         Spacer()
                         if model.connecting.contains(p.id) {
@@ -135,7 +120,62 @@ struct ContentView: View {
                         }
                     }
                 }
+                Divider()
             }
+
+            if model.running {
+                Text("Listening now: set each volume").font(.headline)
+            } else {
+                step(2, "Tick who's listening")
+            }
+            // while sharing, only the active outputs are shown; ticks apply on the next Start
+            ForEach(model.running ? model.devices.filter { model.selected.contains($0.uid) } : model.devices) { d in
+                VStack(alignment: .leading, spacing: 4) {
+                    let label = Label(d.name, systemImage: d.isBluetooth ? "headphones" : "speaker.wave.2").lineLimit(1)
+                    if model.running {
+                        label.padding(.leading, 20)
+                    } else {
+                        Toggle(isOn: Binding(get: { model.selected.contains(d.uid) }, set: { model.toggle(d.uid, $0) })) { label }
+                    }
+                    HStack(spacing: 6) {
+                        Image(systemName: "speaker.fill").font(.caption2).foregroundStyle(.secondary)
+                        Slider(value: Binding(get: { Double(model.volumes[d.id] ?? 0) },
+                                              set: { model.setVolume(Float($0), d) }), in: 0...1)
+                        Image(systemName: "speaker.wave.3.fill").font(.caption2).foregroundStyle(.secondary)
+                    }
+                    .padding(.leading, 20)
+                    .disabled(!model.volumeSettable.contains(d.id))
+                }
+            }
+
+            Divider()
+            if model.running {
+                HStack {
+                    Label("Sharing sound with \(model.playingCount) outputs", systemImage: "dot.radiowaves.left.and.right")
+                        .foregroundStyle(.green)
+                    Spacer()
+                    Button("Stop") { model.stop() }
+                }
+            } else {
+                step(3, "Start")
+                Button { model.start() } label: {
+                    Label(model.selectedUIDs.count < 2 ? "Share sound" : "Share sound with \(model.selectedUIDs.count) outputs",
+                          systemImage: "play.fill")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(model.selectedUIDs.count < 2 ? Color.secondary : .white)
+                        .frame(maxWidth: .infinity).padding(.vertical, 8)
+                        .background(model.selectedUIDs.count < 2 ? Color.secondary.opacity(0.15) : .accentColor,
+                                    in: RoundedRectangle(cornerRadius: 8))
+                        .contentShape(Rectangle())
+                }
+                // explicit style: stays blue even when the panel isn't the active window
+                .buttonStyle(.plain)
+                .disabled(model.selectedUIDs.count < 2)
+                if model.selectedUIDs.count < 2 {
+                    Text("Tick at least two outputs above.").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            if let e = model.error { Text(e).foregroundColor(.red).font(.caption) }
 
             Divider()
             HStack {
@@ -144,8 +184,16 @@ struct ContentView: View {
                 Button("Quit") { model.quit() }
             }
         }
-        .padding(12)
+        .padding(14)
         .frame(width: 320)
         .onAppear { model.refresh() }
+    }
+
+    private func step(_ n: Int, _ title: String) -> some View {
+        HStack(spacing: 6) {
+            Text("\(n)").font(.caption.bold()).foregroundStyle(.white)
+                .frame(width: 18, height: 18).background(Color.accentColor, in: Circle())
+            Text(title).font(.headline)
+        }
     }
 }

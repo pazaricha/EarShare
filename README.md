@@ -26,10 +26,13 @@ macOS only plays sound to **one** pair of headphones at a time. EarShare plays y
 Requires macOS 14 (Sonoma) or later. Apple Silicon and Intel.
 
 ## Use
-1. Click the 🍿 icon in the menu bar.
-2. Connect both pairs of headphones (from EarShare or the Bluetooth menu).
-3. Tick them → **Play on selected**.
-4. Each of you sets your own volume. **Stop** when the credits roll.
+<p align="center"><img src="marketing/video/earshare-howto.gif" alt="How to use EarShare in 20 seconds" width="800"></p>
+
+1. Click the popcorn icon in the menu bar.
+2. **Connect headphones:** paired AirPods are listed with a Connect button.
+3. **Tick who's listening:** tick both AirPods.
+4. **Start:** press **Share sound with 2 outputs**.
+5. Each of you sets your own volume. **Stop** when the credits roll.
 
 ## Good to know
 - If an app uses an AirPods **microphone** (Zoom, FaceTime), those AirPods drop to low-quality call audio and may break the combo — use the Mac's mic instead.
