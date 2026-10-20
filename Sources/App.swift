@@ -99,6 +99,9 @@ struct EarShareApp: App {
 
 struct ContentView: View {
     @EnvironmentObject var model: Model
+    // brand colours from the app icon: popcorn for controls, the bucket's red for the one main action
+    static let popcorn = Color(red: 0.96, green: 0.66, blue: 0.16)
+    static let bucket = Color(red: 0.88, green: 0.27, blue: 0.20)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -164,7 +167,7 @@ struct ContentView: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(model.selectedUIDs.count < 2 ? Color.secondary : .white)
                         .frame(maxWidth: .infinity).padding(.vertical, 8)
-                        .background(model.selectedUIDs.count < 2 ? Color.secondary.opacity(0.15) : .accentColor,
+                        .background(model.selectedUIDs.count < 2 ? Color.secondary.opacity(0.15) : Self.bucket,
                                     in: RoundedRectangle(cornerRadius: 8))
                         .contentShape(Rectangle())
                 }
@@ -186,13 +189,14 @@ struct ContentView: View {
         }
         .padding(14)
         .frame(width: 320)
+        .tint(Self.popcorn)
         .onAppear { model.refresh() }
     }
 
     private func step(_ n: Int, _ title: String) -> some View {
         HStack(spacing: 6) {
-            Text("\(n)").font(.caption.bold()).foregroundStyle(.white)
-                .frame(width: 18, height: 18).background(Color.accentColor, in: Circle())
+            Text("\(n)").font(.caption.bold()).foregroundStyle(.black.opacity(0.8))
+                .frame(width: 18, height: 18).background(Self.popcorn, in: Circle())
             Text(title).font(.headline)
         }
     }
