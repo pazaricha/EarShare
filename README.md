@@ -16,12 +16,14 @@ macOS only plays sound to **one** pair of headphones at a time. EarShare plays y
 - No drivers, no kernel extensions — it uses macOS's own Multi-Output Device under the hood
 
 ## Install
-1. Download `EarShare.zip` from [Releases](../../releases/latest) and unzip.
-2. Drag **EarShare.app** to Applications.
-3. First launch: EarShare isn't notarized by Apple yet, so macOS will block it.
+<p align="center"><a href="https://github.com/pazaricha/EarShare/releases/latest/download/EarShare.dmg"><b>⬇️ Download EarShare.dmg</b></a></p>
+
+1. Open **EarShare.dmg** and drag **EarShare** into **Applications**.
+2. First launch: EarShare isn't notarized by Apple yet, so macOS will block it.
    Open it once, then go to **System Settings → Privacy & Security** and click **Open Anyway**.
    Or in Terminal: `xattr -dr com.apple.quarantine /Applications/EarShare.app`
-4. Allow Bluetooth access when asked.
+3. Allow Bluetooth access when asked.
+4. Look for the popcorn icon in your menu bar.
 
 Requires macOS 14 (Sonoma) or later. Apple Silicon and Intel.
 
@@ -44,6 +46,12 @@ Needs only the Xcode Command Line Tools (`xcode-select --install`):
 ```bash
 ./build.sh
 open build/EarShare.app
+```
+
+## Release
+```bash
+pip install dmgbuild
+Tools/release.sh 1.2   # builds, makes EarShare.dmg + .zip, publishes the GitHub release
 ```
 
 ## License
