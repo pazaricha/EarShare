@@ -99,9 +99,10 @@ struct EarShareApp: App {
 
 struct ContentView: View {
     @EnvironmentObject var model: Model
-    // brand colours from the app icon: popcorn for controls, the bucket's red for the one main action
-    static let popcorn = Color(red: 0.96, green: 0.66, blue: 0.16)
-    static let bucket = Color(red: 0.88, green: 0.27, blue: 0.20)
+    // teal for steps and controls; green starts, red stops
+    static let accent = Color(red: 0.13, green: 0.63, blue: 0.60)
+    static let go = Color(red: 0.20, green: 0.66, blue: 0.33)
+    static let stop = Color(red: 0.88, green: 0.27, blue: 0.20)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -153,27 +154,13 @@ struct ContentView: View {
 
             Divider()
             if model.running {
-                HStack {
-                    Label("Sharing sound with \(model.playingCount) outputs", systemImage: "dot.radiowaves.left.and.right")
-                        .foregroundStyle(.green)
-                    Spacer()
-                    Button("Stop") { model.stop() }
-                }
+                Label("Sharing sound with \(model.playingCount) outputs", systemImage: "dot.radiowaves.left.and.right")
+                    .foregroundStyle(Self.go)
+                bigButton("Stop sharing", "stop.fill", Self.stop, enabled: true) { model.stop() }
             } else {
                 step(3, "Start")
-                Button { model.start() } label: {
-                    Label(model.selectedUIDs.count < 2 ? "Share sound" : "Share sound with \(model.selectedUIDs.count) outputs",
-                          systemImage: "play.fill")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(model.selectedUIDs.count < 2 ? Color.secondary : .white)
-                        .frame(maxWidth: .infinity).padding(.vertical, 8)
-                        .background(model.selectedUIDs.count < 2 ? Color.secondary.opacity(0.15) : Self.bucket,
-                                    in: RoundedRectangle(cornerRadius: 8))
-                        .contentShape(Rectangle())
-                }
-                // explicit style: stays blue even when the panel isn't the active window
-                .buttonStyle(.plain)
-                .disabled(model.selectedUIDs.count < 2)
+                bigButton(model.selectedUIDs.count < 2 ? "Share sound" : "Share sound with \(model.selectedUIDs.count) outputs",
+                          "play.fill", Self.go, enabled: model.selectedUIDs.count >= 2) { model.start() }
                 if model.selectedUIDs.count < 2 {
                     Text("Tick at least two outputs above.").font(.caption).foregroundStyle(.secondary)
                 }
@@ -189,14 +176,28 @@ struct ContentView: View {
         }
         .padding(14)
         .frame(width: 320)
-        .tint(Self.popcorn)
+        .tint(Self.accent)
         .onAppear { model.refresh() }
+    }
+
+    // explicit fill: keeps its colour even when the panel isn't the active window
+    private func bigButton(_ title: String, _ icon: String, _ color: Color, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: icon)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(enabled ? Color.white : .secondary)
+                .frame(maxWidth: .infinity).padding(.vertical, 8)
+                .background(enabled ? color : Color.secondary.opacity(0.15), in: RoundedRectangle(cornerRadius: 8))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
     }
 
     private func step(_ n: Int, _ title: String) -> some View {
         HStack(spacing: 6) {
-            Text("\(n)").font(.caption.bold()).foregroundStyle(.black.opacity(0.8))
-                .frame(width: 18, height: 18).background(Self.popcorn, in: Circle())
+            Text("\(n)").font(.caption.bold()).foregroundStyle(.white)
+                .frame(width: 18, height: 18).background(Self.accent, in: Circle())
             Text(title).font(.headline)
         }
     }

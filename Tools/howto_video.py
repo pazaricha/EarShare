@@ -64,7 +64,7 @@ scenes = [
     (frame("1. Connect headphones", "Connecting…", "2-connecting"), 1.5),
     (frame("2. Tick who's listening", "Both AirPods are connected now.\nTick each one you want.", "3-connected"), 2.5),
     (frame("2. Tick who's listening", "Two ticked: you're ready.", "4-ticked"), 2.0),
-    (frame("3. Share sound", "Press the blue button.\nThe movie plays in both AirPods.", "4-ticked"), 2.5),
+    (frame("3. Share sound", "Press the green button.\nThe movie plays in both AirPods.", "4-ticked"), 2.5),
     (frame("Set your own volume", "Each person gets a slider.\nPress Stop when the credits roll.", "5-sharing-dark"), 3.5),
     (card([("Free and open source", BOLD), ("github.com/pazaricha/EarShare", SUB)]), 3.0),
 ]
@@ -83,7 +83,11 @@ for i in range(1, len(scenes)):
     prev = f"v{i}"
 fc = f"{OUT}/filter.txt"; open(fc, "w").write(";".join(filters))
 mp4 = f"{OUT}/earshare-howto.mp4"
-subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *args, "-/filter_complex", fc, "-map", f"[{prev}]",
+total = sum(s for _, s in scenes) - FADE * (len(scenes) - 1)
+# music: Tools/lullaby.py output, faded out with the last scene
+open(fc, "a").write(f";[{len(scenes)}:a]atrim=0:{total:.2f},afade=t=in:d=0.5,afade=t=out:st={total - 2.5:.2f}:d=2.5,volume=0.8[a]")
+subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *args, "-i", f"{OUT}/lullaby.wav", "-/filter_complex", fc,
+                "-map", f"[{prev}]", "-map", "[a]", "-c:a", "aac", "-b:a", "160k",
                 "-r", "30", "-pix_fmt", "yuv420p", "-c:v", "libx264", "-crf", "20", mp4], check=True)
 subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", mp4, "-vf",
                 "fps=8,scale=800:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse",
