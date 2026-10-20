@@ -48,3 +48,5 @@ open build/EarShare.app
 
 ## License
 MIT
+
+How-to video music: "And So It Begins" by Artificial.Music, licensed under CC BY.

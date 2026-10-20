@@ -61,6 +61,7 @@
 **Topics:** Mac, Parenting, Open Source, Audio
 **Thumbnail:** `marketing/producthunt/thumbnail.png` (240×240)
 **Gallery** (1270×760, in order): `marketing/producthunt/1-hero.png`, `2-share.png`, `3-volume.png`, `4-bed.png`, `5-connect.png`
+**Video music credit** (put in the YouTube description): Music: "And So It Begins" by Artificial.Music (CC BY)
 **Video:** upload `marketing/video/earshare-howto.mp4` to YouTube (unlisted is fine) and paste the link. Product Hunt only accepts YouTube/Loom links.
 
 **Description** (≤ 260 chars):

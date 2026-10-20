@@ -84,9 +84,10 @@ for i in range(1, len(scenes)):
 fc = f"{OUT}/filter.txt"; open(fc, "w").write(";".join(filters))
 mp4 = f"{OUT}/earshare-howto.mp4"
 total = sum(s for _, s in scenes) - FADE * (len(scenes) - 1)
-# music: Tools/lullaby.py output, faded out with the last scene
-open(fc, "a").write(f";[{len(scenes)}:a]atrim=0:{total:.2f},afade=t=in:d=0.5,afade=t=out:st={total - 2.5:.2f}:d=2.5,volume=0.8[a]")
-subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *args, "-i", f"{OUT}/lullaby.wav", "-/filter_complex", fc,
+# music: "And So It Begins" by Artificial.Music (CC BY, credited in README), not committed; falls back to Tools/lullaby.py output
+music = f"{OUT}/music.mp3" if os.path.exists(f"{OUT}/music.mp3") else f"{OUT}/lullaby.wav"
+open(fc, "a").write(f";[{len(scenes)}:a]atrim=0:{total:.2f},afade=t=in:d=0.5,afade=t=out:st={total - 2.5:.2f}:d=2.5[a]")
+subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *args, "-i", music, "-/filter_complex", fc,
                 "-map", f"[{prev}]", "-map", "[a]", "-c:a", "aac", "-b:a", "160k",
                 "-r", "30", "-pix_fmt", "yuv420p", "-c:v", "libx264", "-crf", "20", mp4], check=True)
 subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", mp4, "-vf",
